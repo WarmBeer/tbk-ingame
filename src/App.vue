@@ -6,7 +6,7 @@
           <div class="header-text">SERVER BROWSER</div>
           <div class="header-functions">
             <input id="server-list-filter" type="text" placeholder="Search.." v-model="query">
-            <button id="refresh" :class="getClass()" @click="refresh()">Refresh</button>
+            <button id="refresh" class="btn-refresh" @click="refresh()">Refresh</button>
           </div>
         </div>
         <div class="bottom-header">
@@ -18,6 +18,10 @@
         </div>
       </div>
       <div id="server-list-wrap">
+        <ServerList
+        :servers="servers"
+        >
+        </ServerList>
       </div>
     </div>
   </div>
@@ -25,8 +29,10 @@
 
 <script>
 
+import ServerList from "@/components/ServerList";
 export default {
   name: 'App',
+  components: {ServerList},
   data() {
     return {
       query: '',
@@ -37,17 +43,26 @@ export default {
   },
   methods: {
     refresh() {
+      this.isRefreshing = true;
       fetch('https://halokeg.net/api/messages')
               .then(response => response.json())
               .then((result) => {
                 this.servers = result;
-                console.log(result);
+                this.isRefreshing = false;
+              });
+      fetch('https://halokeg.net/api/players')
+              .then(response => response.json())
+              .then((result) => {
+                this.totalPlayers = result;
               });
     },
     getClass(){
       return this.isRefreshing ? "refreshing" : "";
     },
   },
+  mounted() {
+    this.refresh();
+  }
 }
 </script>
 
@@ -81,12 +96,12 @@ export default {
     right: 0;
     bottom: 0;
     left: 0;
-    padding: 1% 4% 5% 5%;
-    background-color: rgba(0, 0, 0, 0.5);
+    padding: 2% 12%;
+    background: linear-gradient(rgba(0,26,53,.9),rgba(0,26,53,.8))
   }
 
   .header {
-    margin: 1%;
+    margin: 1% 0;
   }
 
   .upper-header {
@@ -113,21 +128,16 @@ export default {
   }
 
   .header-text {
-    font-weight: 500;
-    font-size: 2.55vw;
-    letter-spacing: 1.1vw;
+    font-size: 2vw;
+    letter-spacing: 0.6vw;
     color: rgba(255, 255, 255, 1.0);
-    -webkit-font-smoothing: none;
-    font-style: normal;
-    text-decoration: none;
-    transform: scaleY(1.06);
-    float: left;
+    font-weight: 700;
   }
 
   .header-info {
-    color: coral;
+    color: rgb(249, 159, 28);
     font-size: 1.2vw;
-    font-weight: 500;
+    font-weight: bold;
     justify-content: space-between;
     display: flex;
     float: left;
@@ -173,42 +183,26 @@ export default {
     border-collapse: collapse;
   }
 
-  .server-list th:nth-child(1), .server-list td:nth-child(1){ width: 2%;}
-  .server-list th:nth-child(2), .server-list td:nth-child(2){ width: 2%;}
-  .server-list th:nth-child(3), .server-list td:nth-child(3){ width: 41%;}
-  .server-list th:nth-child(4), .server-list td:nth-child(4){ width: 15%;}
+  .server-list th:nth-child(1), .server-list td:nth-child(1){ width: 10%;}
+  .server-list th:nth-child(2), .server-list td:nth-child(2){ width: 20%;}
+  .server-list th:nth-child(3), .server-list td:nth-child(3){ width: 10%;}
+  .server-list th:nth-child(4), .server-list td:nth-child(4){ width: 30%;}
   .server-list th:nth-child(5), .server-list td:nth-child(5){ width: 10%;}
   .server-list th:nth-child(6), .server-list td:nth-child(6){ width: 10%;}
-  .server-list th:nth-child(7), .server-list td:nth-child(7){ width: 8%;}
-  .server-list th:nth-child(8), .server-list td:nth-child(8){ width: 7%;}
-  .server-list th:nth-child(9), .server-list td:nth-child(9){ width: 5%;}
+  .server-list th:nth-child(7), .server-list td:nth-child(6){ width: 10%;}
 
-  .server-list > tbody > tr {
-    font-size: 1vw;
-    color: rgba(255, 255, 255, 0.9);
-    width: calc(100% - 6px);
-    border-left: 4px solid transparent;
-  }
-
-  .server-list > tbody > tr:hover {
-    /*
-    background-color: rgba(240,248,255, 0.2);
+  .server-list tr {
+    font-size: 0.9vw;
     color: rgba(255, 255, 255, 1);
-    border-left-color: rgba(240,248,255, 0.4);
-     */
-    background: -webkit-radial-gradient(80%, circle, rgba(199,128,58,0.45) 0%,rgba(211,125,38,0.6) 100%);
-    color: rgba(255, 255, 255, 1.0);
-    border-left-color: rgba(199,125,58,0.9);
-    -webkit-animation: menu-entry-background-pulse 2.5s ease infinite;
+    display: table-row;
   }
 
   .server-list > tbody > tr > td {
-    display: flex;
+    display: table-cell;
     align-items:center;
-    padding: 15px 0;
-    padding-left: 10px;
     overflow: hidden;
     text-overflow: ellipsis;
+    text-align: left;
   }
 
   .server-list > thead {
@@ -216,7 +210,7 @@ export default {
     background: rgba(255, 255, 255, 0.15);
     border-radius: 0px;
     width: 100%;
-    display: block;
+    display: table-header-group;
     color: rgba(255, 255, 255, 0.75);
     text-transform: uppercase;
   }
@@ -232,24 +226,10 @@ export default {
   }
 
   .server-list > tbody {
-    display:block;
+    display:table-row-group;
     height: 70vh;
     overflow: hidden;
     overflow-y: auto;
-  }
-  .server-list > thead, .server-list > tbody > tr {
-    display:table;
-    width:100%;
-    table-layout:fixed;/* even columns width , fix width of table too*/
-  }
-
-  .server-list > thead {
-    width: 99.35%;
-    margin-left: 4px;
-  }
-
-  table.server-list thead tr, .server-list tbody tr {
-    display: flex;
   }
 
   .header-functions {
@@ -352,7 +332,7 @@ export default {
 
   .server-detailed .server-detailed-stats span {
     font-weight: 400;
-    font-size: 1.2vw;
+    font-size: 1vw;
     text-align: right;
     width: 100%;
     white-space: nowrap;
@@ -370,7 +350,7 @@ export default {
   .server-detailed .server-detailed-info span {
     padding: 0 0px;
     font-weight: 400;
-    font-size: 1.2vw;
+    font-size: 1vw;
     text-align: left;
     vertical-align: center;
     width: 100%;
@@ -381,7 +361,7 @@ export default {
   }
 
   .server-detailed-info span.name {
-    font-size: 1.2vw;
+    font-size: 1.1vw;
     font-weight: bold;
   }
 
@@ -412,56 +392,21 @@ export default {
   /*Search*/
   #server-list-filter {
     background: url(assets/search.svg) no-repeat;
-    background-color: rgba(0,0,0, 0.15);
-    font-size: 1vw;
+    background-color: rgba(255, 255, 255, 0.15);
+    font-size: 0.9vw;
     color: white;
-    padding: 0px 12px;
-    padding-left: 8%;
+    padding: 0 0.6vw;
+    padding-left: 14%;
     outline: none;
-    border-radius: 24px;
     margin-right: 4%;
-    width: 20vw;
-    border: 3px solid rgba(255,255,255,0.15);
+    width: 16vw;
+    border: 1px solid rgba(255,255,255,0.3);
     background-size: auto 50%;
     background-position: 5% 50%;
   }
 
   #server-list-filter:focus{
     color: white;
-  }
-
-  button#refresh:hover {
-    opacity: 1;
-  }
-  button#refresh {
-    width: 2.8vw;
-    height: 2.8vw;
-    font-size: 0;
-    background: none;
-    border: none;
-    background-image: url(assets/icon-refresh.svg);
-    background-repeat: no-repeat;
-    background-size: 100% 100%;
-    /* top: 0; */
-    vertical-align: top;
-    margin-top: 5px;
-    outline: none;
-    opacity: 0.8;
-  }
-  button#refresh.refreshing{
-    opacity: 1;
-    animation-name: refreshing;
-    animation-duration: 1000ms;
-    animation-iteration-count: infinite;
-    animation-timing-function: linear;
-  }
-  @keyframes refreshing {
-    from {
-      transform:rotate(0deg);
-    }
-    to {
-      transform:rotate(360deg);
-    }
   }
 
   /* Let's get this party started */
@@ -499,6 +444,25 @@ export default {
 
   .toggle-view:hover {
     box-shadow: 0 2px 10px 0 rgba(255, 255, 255, 0.2);
+  }
+
+  .btn-refresh {
+    padding: 0.6vw 1.2vw;
+    border: 1px inset hsla(0,0%,100%,.02);
+    text-align: center;
+    font-weight: lighter;
+    color: hsla(0,0%,100%,1);
+    background: hsla(0,0%,100%,.15);
+    -webkit-transition: .2s ease-in-out;
+    transition: .2s ease-in-out;
+    text-decoration: none;
+    font-size: 0.9vw;
+    outline: none;
+  }
+
+  .btn-refresh:hover {
+    color: hsla(0,0%,100%,1);
+    background: hsla(0,0%,100%,.2);
   }
 
 </style>
